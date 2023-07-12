@@ -7,6 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Views\Departaments\**" />
+    <Content Remove="Views\Departaments\**" />
+    <EmbeddedResource Remove="Views\Departaments\**" />
+    <None Remove="Views\Departaments\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Controllers\DepartamentsController.cs" />
     <Compile Remove="Views\Home\Index1.cshtml.cs" />
   </ItemGroup>
 
@@ -16,6 +24,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.18" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.18">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.14" />
   </ItemGroup>
 
