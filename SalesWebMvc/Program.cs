@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using SalesWebMvc.Data;
 using SalesWebMvc.Models;
 
 namespace SalesWebMvc
@@ -36,6 +37,8 @@ namespace SalesWebMvc
                 options.HtmlHelperOptions.ClientValidationEnabled = true;
             });
 
+            builder.Services.AddScoped<SeedingService>();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -44,6 +47,16 @@ namespace SalesWebMvc
                 app.UseExceptionHandler("/Home/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
+            }
+            else
+            {
+                using (var scope = app.Services.CreateScope())
+                {
+                    var services = scope.ServiceProvider;
+                    var seedingService = services.GetRequiredService<SeedingService>();
+
+                    seedingService.Seed();
+                }
             }
 
             app.UseHttpsRedirection();
