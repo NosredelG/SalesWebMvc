@@ -1,6 +1,9 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using SalesWebMvc.Models;
+
 namespace SalesWebMvc
 {
     public class Program
@@ -8,11 +11,30 @@ namespace SalesWebMvc
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            builder.Services.AddDbContext<SalesWebMvcContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("SalesWebMvcContext") ?? throw new InvalidOperationException("Connection string 'SalesWebMvcContext' not found.")));
 
-            // Add services to the container.
-            builder.Services.AddControllersWithViews();
+            var connectionString = builder.Configuration.GetConnectionString("SalesWebMvcContext");
+            builder.Services.AddDbContext<SalesWebMvcContext>(options =>
+            {
+                options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 26)));
+            });
+
+            // Configuração do serviço de autenticação
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie();
+
+            // Configuração do serviço de autorização
+            builder.Services.AddAuthorization(options =>
+            {
+                options.DefaultPolicy = new AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .Build();
+            });
+
+            // Configuração do serviço de controladores e ITempDataDictionaryFactory
+            builder.Services.AddMvc().AddViewOptions(options =>
+            {
+                options.HtmlHelperOptions.ClientValidationEnabled = true;
+            });
 
             var app = builder.Build();
 
@@ -29,11 +51,15 @@ namespace SalesWebMvc
 
             app.UseRouting();
 
+            // Adicione o middleware de autenticação
+            app.UseAuthentication();
+
+            // Adicione o middleware de autorização
             app.UseAuthorization();
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+                pattern: "/{controller=Home}/{action=Index}/{id?}");
 
             app.Run();
         }
